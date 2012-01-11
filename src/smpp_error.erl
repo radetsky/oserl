@@ -170,5 +170,7 @@ format(?ESME_RINVBCAST_REP) ->
 format(?ESME_RINVBCASTSRVGRP) ->
     "Broadcast Service Group is invalid.";
 format(?ESME_RINVBCASTCHANIND) ->
-    "Broadcast Channel Indicator is invalid.".
+    "Broadcast Channel Indicator is invalid.";
+format(Error) ->
+    "Unrecognized Error Code: 16#" ++ erlang:integer_to_list(Error, 16).
 
