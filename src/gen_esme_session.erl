@@ -524,8 +524,10 @@ handle_sync_event({reply, {SeqNum, Reply}}, _From, Stn, Std) ->
     Log = Std#st.log,
     case Reply of
         {ok, PList1} ->
-            PList2  = [{congestion_state, Std#st.congestion_state}],
-            Params = smpp_operation:merge(PList1, PList2),
+            % Some clients can't handle congestion_state.
+            %PList2  = [{congestion_state, Std#st.congestion_state}],
+            %Params = smpp_operation:merge(PList1, PList2),
+            Params = PList1,
             send_response(RespId, ?ESME_ROK, SeqNum, Params, Sock, Log);
         {error, Error} ->
             send_response(RespId, Error, SeqNum, [], Sock, Log)
