@@ -138,7 +138,7 @@ handle_call(Req, St) ->
     erlang:error(function_clause, [Req, St]).
 
 
-handle_event({pdu, Pdu}, St) ->
+handle_event({pdu, _, Pdu}, St) ->
     case catch (St#st.filter)(Pdu) of
         true ->
             disk_log:alog(St#st.name, {now(), (St#st.format)(Pdu)});

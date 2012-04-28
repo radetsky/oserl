@@ -123,7 +123,7 @@ tcp_send(Sock, Data) when is_port(Sock) ->
 send_pdu(Sock, BinPdu, Log) when is_list(BinPdu) ->
     case tcp_send(Sock, BinPdu) of
         ok ->
-            ok = smpp_log_mgr:pdu(Log, BinPdu);
+            ok = smpp_log_mgr:pdu(Log, {out, BinPdu});
         {error, Reason} ->
             gen_fsm:send_all_state_event(self(), {sock_error, Reason})
     end;
@@ -230,7 +230,7 @@ handle_input(Pid, <<CmdLen:32, Rest/binary>> = Buffer, Lapse, N, Log) ->
             BinPdu = <<CmdLen:32, PduRest/binary>>,
             case catch smpp_operation:unpack(BinPdu) of
                 {ok, Pdu} ->
-                    smpp_log_mgr:pdu(Log, BinPdu),
+                    smpp_log_mgr:pdu(Log, {in, BinPdu}),
                     CmdId = smpp_operation:get_value(command_id, Pdu),
                     Event = {input, CmdId, Pdu, (Lapse div N), Now},
                     gen_fsm:send_all_state_event(Pid, Event);

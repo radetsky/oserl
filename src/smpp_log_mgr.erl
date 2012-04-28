@@ -68,7 +68,7 @@ swap_handler(Pid, HandlerArgs1, HandlerArgs2) ->
 %%%-----------------------------------------------------------------------------
 %%% EVENT EXPORTS
 %%%-----------------------------------------------------------------------------
-pdu(Pid, IoList) when is_list(IoList) ->
-    pdu(Pid, list_to_binary(IoList));
-pdu(Pid, Pdu) when is_binary(Pdu) ->
-    gen_event:notify(Pid, {pdu, Pdu}).
+pdu(Pid, {Direction, IoList}) when is_list(IoList) ->
+    pdu(Pid, {Direction, list_to_binary(IoList)});
+pdu(Pid, {Direction, Pdu}) when is_binary(Pdu) ->
+    gen_event:notify(Pid, {pdu, Direction, Pdu}).

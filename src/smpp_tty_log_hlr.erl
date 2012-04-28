@@ -97,7 +97,7 @@ handle_call(Req, St) ->
     erlang:error(function_clause, [Req, St]).
 
 
-handle_event({pdu, BinPdu}, St) ->
+handle_event({pdu, _, BinPdu}, St) ->
     case catch (St#st.filter)(BinPdu) of
         true when St#st.io_device == undefined ->
             io:format("~p~n", [(St#st.format)(BinPdu)]);
