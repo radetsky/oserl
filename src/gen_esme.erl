@@ -117,6 +117,7 @@
          handle_operation/2,
          handle_outbind/2,
          handle_resp/3,
+         handle_timeout/3,
          handle_unbind/2]).
 
 %%% MACROS
@@ -594,6 +595,8 @@ handle_outbind(SrvRef, Pdu) ->
 handle_resp(SrvRef, Resp, Ref) ->
     gen_server:cast(SrvRef, {handle_resp, Resp, Ref}).
 
+handle_timeout(_SrvRef, _SeqNum, _Ref) ->
+    ok.
 
 handle_unbind(SrvRef, Pdu) ->
     gen_server:call(SrvRef, {handle_unbind, Pdu}, ?ASSERT_TIME).
