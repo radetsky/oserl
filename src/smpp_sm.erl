@@ -38,6 +38,7 @@
          unpack/2,
          destination_port/1,
          ie/2,
+         ies_foldl/3,
          join_user_data/1,
          message_user_data/1,
          originator_port/1,
@@ -97,6 +98,12 @@ ie(Iei, [_Other, Iedl|_] = Data, Len) ->
     NewLen = Len - Iedl - 2,
     ie(Iei, lists:sublist(Data, Iedl + 3, NewLen), NewLen).
 
+ies_foldl(_Fun, Acc, []) ->
+	Acc;
+ies_foldl(Fun, Acc, Ies ) -> % Ies - Udh with trimmed UDHL
+	[_Iei, Iedl|_] = Ies,
+	{Ie, Rest} = lists:split(Iedl + 2, Ies),
+	ies_foldl(Fun, Fun(Ie, Acc), Rest).
 
 join_user_data(Segments) ->
     Choped = [chop_udh(S) || S <- Segments], % UDH + Data
