@@ -495,8 +495,6 @@ handle_call({handle_accept, Addr}, From, St) ->
     pack((St#st.mod):handle_accept(Addr, From, St#st.mod_st), St);
 handle_call({handle_data_sm, Pdu}, From, St) ->
     pack((St#st.mod):handle_data_sm(Pdu, From, St#st.mod_st), St);
-handle_call({handle_deliver_sm, Pdu}, From, St) ->
-    pack((St#st.mod):handle_deliver_sm(Pdu, From, St#st.mod_st), St);
 handle_call({handle_unbind, Pdu}, From, St) ->
     pack((St#st.mod):handle_unbind(Pdu, From, St#st.mod_st), St);
 handle_call({handle_enquire_link, _Pdu}, _From, St) ->
@@ -547,6 +545,13 @@ handle_cast({rps_max, Rps}, St) ->
     {noreply, St#st{rps = Rps}};
 handle_cast({handle_resp, Resp, Ref}, St) ->
     pack((St#st.mod):handle_resp(Resp, Ref, St#st.mod_st), St);
+handle_cast({handle_deliver_sm, Pdu, From}, St) ->
+	case (St#st.mod):handle_deliver_sm(Pdu, From, St#st.mod_st) of
+		{reply, Reply, ModSt} ->
+			SeqNum = smpp_operation:get_value(sequence_number, Pdu),
+			gen_esme_session:reply(St#st.session, {SeqNum, Reply}),
+		    {noreply, St#st{mod_st = ModSt}}
+	end;
 handle_cast({handle_alert_notification, Pdu}, St) ->
     pack((St#st.mod):handle_alert_notification(Pdu, St#st.mod_st), St).
 
@@ -585,7 +590,8 @@ handle_enquire_link(SrvRef, Pdu) ->
 handle_operation(SrvRef, {data_sm, Pdu}) ->
     gen_server:call(SrvRef, {handle_data_sm, Pdu}, ?ASSERT_TIME);
 handle_operation(SrvRef, {deliver_sm, Pdu}) ->
-    gen_server:call(SrvRef, {handle_deliver_sm, Pdu}, ?ASSERT_TIME).
+    gen_server:cast(SrvRef, {handle_deliver_sm, Pdu, self()}),
+	noreply.
 
 
 handle_outbind(SrvRef, Pdu) ->
@@ -700,3 +706,4 @@ split_options([{file_queue, _} = H | T], Esme, Srv) ->
     split_options(T, [H | Esme], Srv);
 split_options([H | T], Esme, Srv) ->
     split_options(T, Esme, [H | Srv]).
+    
